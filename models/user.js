@@ -22,6 +22,10 @@ const userSchema = new Schema({
     type: Number,
     default: 0
   },
+  onlineStatus: {
+    type: Boolean,
+    default: false
+  },
   games: [
     {
       type: Schema.Types.ObjectId,
