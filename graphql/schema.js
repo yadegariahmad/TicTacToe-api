@@ -34,8 +34,8 @@ module.exports = buildSchema(`
     password: String!
   }
 
-  input UserInputData {
-    id: String!
+  input GameInputData {
+    id: ID!
     draw: Boolean!
     winnerId: String!
   }
@@ -44,13 +44,13 @@ module.exports = buildSchema(`
     login(email: String!, password: String!): AuthData!
     searchUser(userName: String!): User
     sendGameRequest(userId: String): Boolean
-    respondGameRequest(userId: String): Boolean
+    respondGameRequest(playerId: String!, opponentUserName: String!, answer: Boolean!): String
   }
 
   type RootMutation {
     createUser(userInput: UserInputData): User!
-    setOnlineStatus(userId: String!, status: Boolean!): Boolean
-    finishGame(game: Game): Boolean
+    changeStatus(userId: String!): Boolean
+    finishGame(game: GameInputData): Boolean
   }
 
   schema {
