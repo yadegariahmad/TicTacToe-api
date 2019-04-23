@@ -2,7 +2,7 @@ const Game = require('../models/game');
 const User = require('../models/user');
 const io = require('../utils/socket');
 
-module.sendGameRequest = async function ({ userId, opponentId })
+module.exports.sendGameRequest = async function ({ userId, opponentId })
 {
   const opponent = await User.findById(opponentId);
   const user = await User.findById(userId);
@@ -17,7 +17,7 @@ module.sendGameRequest = async function ({ userId, opponentId })
   }
 }
 
-module.respondGameRequest = async function ({ playerId, opponentUserName, answer })
+module.exports.respondGameRequest = async function ({ playerId, opponentUserName, answer })
 {
   const opponent = await User.findOne({ userName: opponentUserName }); // starter
 
@@ -39,7 +39,7 @@ module.respondGameRequest = async function ({ playerId, opponentUserName, answer
   }
 }
 
-module.changeTurn = async function ({ playerId, gameId })
+module.exports.changeTurn = async function ({ playerId, gameId })
 {
   const game = await Game.findById(gameId);
   // const user = await User.findById(playerId);
@@ -52,7 +52,7 @@ module.changeTurn = async function ({ playerId, gameId })
   return null;
 }
 
-module.finishGame = async function ({ id, draw, winnerId })
+module.exports.finishGame = async function ({ id, draw, winnerId })
 {
   const game = await Game.findById(id);
   const players = game.players;

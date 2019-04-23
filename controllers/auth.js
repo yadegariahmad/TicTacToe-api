@@ -4,8 +4,10 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
-module.createUser = async function ({ userInput })
+module.exports.createUser = async function ({ userInput })
 {
+  console.log(userInput);
+  
   const errors = [];
   if (!validator.isEmail(userInput.email))
   {
@@ -43,10 +45,12 @@ module.createUser = async function ({ userInput })
     password: hashedPw
   });
   const createdUser = await user.save();
+  console.log(createdUser._doc);
+  
   return { ...createdUser._doc, _id: createdUser._id.toString() };
 }
 
-module.login = async function ({ email, password })
+module.exports.login = async function ({ email, password })
 {
   const user = await User.findOne({ email: email });
   if (!user)
