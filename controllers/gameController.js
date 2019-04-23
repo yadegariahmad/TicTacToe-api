@@ -39,6 +39,19 @@ module.respondGameRequest = async function ({ playerId, opponentUserName, answer
   }
 }
 
+module.changeTurn = async function ({ playerId, gameId })
+{
+  const game = await Game.findById(gameId);
+  // const user = await User.findById(playerId);
+  const gamePlayers = game.players;
+  const opponentIndex = gamePlayers.indexOf(playerId) == 0 ? 1 : 0;
+  const opponent = await User.findById(gamePlayers[opponentIndex]);
+
+  io.getIO().broadcast(`changeTurn-${opponent.userName}`, 1);
+  
+  return null;
+}
+
 module.finishGame = async function ({ id, draw, winnerId })
 {
   const game = await Game.findById(id);

@@ -45,6 +45,7 @@ module.exports = buildSchema(`
     searchUser(userName: String!): User
     sendGameRequest(userId: String): Boolean
     respondGameRequest(playerId: String!, opponentUserName: String!, answer: Boolean!): String
+    changeTurn(playerId: String!, gameId: String!): Boolean
   }
 
   type RootMutation {
