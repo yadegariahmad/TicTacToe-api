@@ -1,41 +1,20 @@
 const express = require('express');
-const { json } = require('body-parser');
 const cors = require('cors');
+const { json } = require('body-parser');
 const { connect } = require('mongoose');
-const auth = require('./utils/isAuth');
 
-const graphqlHttp = require('express-graphql');
-const graphqlSchema = require('./graphql/schema');
-const graphqlResolver = require('./graphql/resolvers');
+const authRoutes = require('./routes/auth');
+const gameRoutes = require('./routes/game');
+const userRoutes = require('./routes/user');
 
 const app = express();
 
 app.use(json()); // application/json
 app.use(cors());
 
-app.use(auth);
-
-app.use(
-  '/graphql',
-  graphqlHttp({
-    schema: graphqlSchema,
-    rootValue: graphqlResolver,
-    graphiql: true,
-    customFormatErrorFn(err)
-    {
-      console.log(err);
-      
-      if (!err.originalError)
-      {
-        return err;
-      }
-      const data = err.originalError.data;
-      const message = err.message || 'An error occurred.';
-      const code = err.originalError.code || 500;
-      return { message: message, status: code, data: data };
-    }
-  })
-);
+app.use('/auth', authRoutes);
+app.use('/game', gameRoutes);
+app.use('/user', userRoutes);
 
 app.use((error, _req, res) =>
 {

@@ -1,21 +1,38 @@
 const User = require('../models/user');
+const respondModel = require('../utils/responseModel');
 
-module.exports.changeStatus = async function ({ userId })
+module.exports.changeStatus = function (req, res, next)
 {
+  const { userId } = req.body;
+
   User.findOne({ _id: userId }, user =>
   {
-    user.onlineStatus = false;
+    user.onlineStatus = false; // status is set online on login
     return user.save();
 
   }).then(() =>
   {
-    return true;
-  });
+    const respond = new respondModel({}, 200, 'Status is offline!');
+    res.json(respond);
+  })
+    .catch(error =>
+    {
+      next(error);
+    });
 }
 
-module.exports.searchUser = async function ({ userName })
+module.exports.searchUser = async function (req, res, next)
 {
-  const users = await User.find({ userName: new RegExp(userName, 'i') });
+  const { userName } = req.body;
 
-  return users;
+  try
+  {
+    const users = await User.find({ userName: new RegExp(userName, 'i') });
+
+    const respond = new respondModel({ users }, 200, '');
+    res.json(respond);
+  } catch (error)
+  {
+    next(error);
+  }
 }

@@ -1,85 +1,139 @@
 const Game = require('../models/game');
 const User = require('../models/user');
 const io = require('../utils/socket');
+const respondModel = require('../utils/responseModel');
 
-module.exports.sendGameRequest = async function ({ userId, opponentId })
+module.exports.sendGameRequest = async function (req, res, next)
 {
-  const opponent = await User.findById(opponentId);
-  const user = await User.findById(userId);
+  const { opponentId } = req.body;
+  const { userId } = req.body;
 
-  if (opponent.onlineStatus === false)
+  try
   {
-    return false;
-  } else
-  {
-    io.getIO().broadcast(`gameRequest-${opponent.userName}`, { starter: user.userName });
-    return true;
-  }
-}
+    const opponent = await User.findById(opponentId);
+    const user = await User.findById(userId);
 
-module.exports.respondGameRequest = async function ({ playerId, opponentUserName, answer })
-{
-  const opponent = await User.findOne({ userName: opponentUserName }); // starter
-
-  if (answer)
-  {
-    const date = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
-    const game = new Game({
-      date,
-      players: [playerId, opponent._id]
-    });
-
-    await game.save();
-    io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: game._id, accept: true });
-    return game._id;
-  } else
-  {
-    io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: null, accept: false });
-    return null;
-  }
-}
-
-module.exports.changeTurn = async function ({ playerId, gameId })
-{
-  const game = await Game.findById(gameId);
-  // const user = await User.findById(playerId);
-  const gamePlayers = game.players;
-  const opponentIndex = gamePlayers.indexOf(playerId) == 0 ? 1 : 0;
-  const opponent = await User.findById(gamePlayers[opponentIndex]);
-
-  io.getIO().broadcast(`changeTurn-${opponent.userName}`, 1);
-  
-  return null;
-}
-
-module.exports.finishGame = async function ({ id, draw, winnerId })
-{
-  const game = await Game.findById(id);
-  const players = game.players;
-
-  if (draw)
-  {
-    game.draw = true;
-
-    players.forEach(async player =>
+    if (!opponent)
     {
-      const user = await User.findById(player);
-      user.score++;
-      await user.save();
-    });
-    await game.save();
+      throw Error('user not found');
+    }
 
-    return { winner: null, draw: true };
-  } else
+    if (opponent.onlineStatus === false)
+    {
+      const respond = new respondModel({}, 504, 'User is offline!');
+      res.json(respond);
+    } else
+    {
+      io.getIO().broadcast(`gameRequest-${opponent.userName}`, { starter: user.userName });
+      
+      const respond = new respondModel({}, 200, 'Request was sent!');
+      res.json(respond);
+    }
+  } catch (error)
   {
-    game.draw = false;
-    game.winner = winnerId
+    next(error);
+  }
+}
 
-    const user = await User.findById(winnerId);
-    user.score += 3;
-    await user.save();
-    await game.save();
+module.exports.respondGameRequest = async function (req, res, next)
+{
+  const { opponentUserName } = req.body;
+  const { answer } = req.body;
+  const { playerId } = req.body;
 
-    return { winner: user.userName, draw: false };
+  try
+  {
+    const opponent = await User.findOne({ userName: opponentUserName }); // starter
+
+    if (answer)
+    {
+      const date = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+      const game = new Game({
+        date,
+        players: [playerId, opponent._id]
+      });
+
+      await game.save();
+      io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: game._id, accept: true });
+
+      const respond = new respondModel({ gameId: game._id }, 200, 'Game was created!');
+      res.json(respond);
+    } else
+    {
+      io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: null, accept: false });
+
+      const respond = new respondModel({}, 210, 'Request declined!');
+      res.json(respond);
+    }
+  } catch (error)
+  {
+    next(error);
+  }
+}
+
+module.exports.changeTurn = async function (req, res, next)
+{
+  const { gameId } = req.body;
+  const { playerId } = req.body;
+
+  try
+  {
+    const game = await Game.findById(gameId);
+    // const user = await User.findById(playerId);
+    const gamePlayers = game.players;
+    const opponentIndex = gamePlayers.indexOf(playerId) == 0 ? 1 : 0;
+    const opponent = await User.findById(gamePlayers[opponentIndex]);
+
+    io.getIO().broadcast(`changeTurn-${opponent.userName}`, 1);
+
+    const respond = new respondModel({}, 200, 'Turn changed!');
+    res.json(respond);
+  } catch (error)
+  {
+    next(error);
+  }
+}
+
+module.exports.finishGame = async function (req, res, next)
+{
+  const { gameId } = req.body;
+  const { draw } = req.body;
+  const { winnerId } = req.body;
+
+  try
+  {
+    const game = await Game.findById(gameId);
+    const players = game.players;
+
+    if (draw)
+    {
+      game.draw = true;
+
+      players.forEach(async player =>
+      {
+        const user = await User.findById(player);
+        user.score++;
+        await user.save();
+      });
+      await game.save();
+
+      const respond = new respondModel({ winner: null, draw: true }, 200, 'Game finished!');
+      res.json(respond);
+    } else
+    {
+      game.draw = false;
+      game.winner = winnerId
+
+      const user = await User.findById(winnerId);
+      user.score += 3;
+      await user.save();
+      await game.save();
+
+      const respond = new respondModel({ winner: user.userName, draw: false }, 200, 'Game finished!');
+      res.json(respond);
+    }
+  } catch (error)
+  {
+    next(error);
   }
 }
