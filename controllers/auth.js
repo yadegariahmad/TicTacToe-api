@@ -11,7 +11,7 @@ exports.createUser = async (req, res, next) =>
   const { email } = req.body;
   const { password } = req.body;
   const { userName } = req.body;
-
+  const { name } = req.body;
 
   try
   {
@@ -34,26 +34,32 @@ exports.createUser = async (req, res, next) =>
 
     if (errors.length > 0)
     {
-      const error = new Error('Invalid input.');
-      error.data = errors;
-      error.code = 422;
-      throw error;
+      const respond = new respondModel({}, 422, 'Invalid input');
+      res.json(respond);
     }
+
     const checkEmail = await User.findOne({ email: email });
-    const checkUserName = await User.findOne({ usreName: userName });
-    if (checkEmail || checkUserName)
+    if (checkEmail)
     {
-      const error = new Error('User exists already!');
-      throw error;
+      const respond = new respondModel({}, 400, 'Email exists already!');
+      res.json(respond);
     }
+
+    const checkUserName = await User.findOne({ usreName: userName });
+    if (checkUserName)
+    {
+      const respond = new respondModel({}, 400, 'UserName exists already!');
+      res.json(respond);
+    }
+
     const hashedPw = await bcrypt.hash(password, 12);
     const user = new User({
       email: email,
       name: name,
+      userName: userName,
       password: hashedPw
     });
     const createdUser = await user.save();
-    console.log(createdUser._doc);
 
     const respond = new respondModel({ userId: createdUser._id }, 201, 'User created!');
     res.json(respond);
@@ -73,17 +79,17 @@ exports.login = async function (req, res, next)
     const user = await User.findOne({ email: email });
     if (!user)
     {
-      const error = new Error('User not found.');
-      error.code = 401;
-      throw error;
+      const respond = new respondModel({}, 404, 'User not found.');
+      res.json(respond);
     }
+
     const isEqual = await bcrypt.compare(password, user.password);
     if (!isEqual)
     {
-      const error = new Error('Password is incorrect.');
-      error.code = 401;
-      throw error;
+      const respond = new respondModel({}, 401, 'Password is incorrect.');
+      res.json(respond);
     }
+
     const token = jwt.sign(
       {
         userId: user._id.toString(),
