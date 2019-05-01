@@ -101,7 +101,7 @@ exports.login = async function (req, res, next)
     user.onlineStatus = true;
     await user.save();
 
-    const respond = new respondModel({ token, userId: user._id.toString() }, 201, 'User created!');
+    const respond = new respondModel({ token, userId: user._id.toString() }, 201, 'User logged in');
     res.json(respond);
 
   } catch (error)

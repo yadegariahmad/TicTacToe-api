@@ -24,13 +24,20 @@ module.exports.changeStatus = function (req, res, next)
 module.exports.searchUser = async function (req, res, next)
 {
   const { userName } = req.body;
-
+  
   try
   {
     const users = await User.find({ userName: new RegExp(userName, 'i') });
 
-    const respond = new respondModel({ users }, 200, '');
-    res.json(respond);
+    if (users)
+    {
+      const respond = new respondModel({ users }, 200, '');
+      res.json(respond);
+    } else
+    {
+      const respond = new respondModel({}, 404, '');
+      res.json(respond);
+    }
   } catch (error)
   {
     next(error);
