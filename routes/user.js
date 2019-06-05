@@ -6,6 +6,6 @@ const router = Router();
 
 router.put('/changeStatus', isAuth, userController.changeStatus);
 
-router.get('/search', isAuth, userController.searchUser);
+router.post('/search', isAuth, userController.searchUser);
 
 module.exports = router;
