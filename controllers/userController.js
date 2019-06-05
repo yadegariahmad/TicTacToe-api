@@ -5,10 +5,10 @@ exports.changeStatus = async function (req, res, next)
 {
   const { userId } = req.body;
   const { status } = req.body;
-  
+
   try
   {
-    const user = await User.findOne({_id: userId});
+    const user = await User.findOne({ _id: userId });
     user.onlineStatus = status;
     user.save();
   } catch (error)
@@ -23,7 +23,8 @@ exports.searchUser = async function (req, res, next)
 
   try
   {
-    const users = await User.find({ userName: new RegExp(userName, 'i') });
+    const users = await User.find({ userName: new RegExp(userName, 'i') })
+      .select('name onlineStatus userName');
 
     if (users)
     {

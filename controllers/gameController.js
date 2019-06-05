@@ -3,7 +3,7 @@ const User = require('../models/user');
 const io = require('../utils/socket');
 const respondModel = require('../utils/responseModel');
 
-module.exports.sendGameRequest = async function (req, res, next)
+exports.sendGameRequest = async function (req, res, next)
 {
   const { opponentId } = req.body;
   const { userId } = req.body;
@@ -24,7 +24,7 @@ module.exports.sendGameRequest = async function (req, res, next)
       res.json(respond);
     } else
     {
-      io.getIO().broadcast(`gameRequest-${opponent.userName}`, { starter: user.userName });
+      io.getIO().emit(`gameRequest-${opponent.userName}`, { starter: user.userName });
       
       const respond = new respondModel({}, 200, 'Request was sent!');
       res.json(respond);
@@ -35,7 +35,7 @@ module.exports.sendGameRequest = async function (req, res, next)
   }
 }
 
-module.exports.respondGameRequest = async function (req, res, next)
+exports.respondGameRequest = async function (req, res, next)
 {
   const { opponentUserName } = req.body;
   const { answer } = req.body;
@@ -71,7 +71,7 @@ module.exports.respondGameRequest = async function (req, res, next)
   }
 }
 
-module.exports.changeTurn = async function (req, res, next)
+exports.changeTurn = async function (req, res, next)
 {
   const { gameId } = req.body;
   const { playerId } = req.body;
@@ -94,7 +94,7 @@ module.exports.changeTurn = async function (req, res, next)
   }
 }
 
-module.exports.finishGame = async function (req, res, next)
+exports.finishGame = async function (req, res, next)
 {
   const { gameId } = req.body;
   const { draw } = req.body;
