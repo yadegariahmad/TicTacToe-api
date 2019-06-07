@@ -24,8 +24,8 @@ exports.sendGameRequest = async function (req, res, next)
       res.json(respond);
     } else
     {
-      io.getIO().emit(`gameRequest-${opponent.userName}`, { starter: user.userName });
-      
+      io.getIO().emit(`gameRequest-${opponent._id}`, { starter: user.userName });
+
       const respond = new respondModel({}, 200, 'Request was sent!');
       res.json(respond);
     }
@@ -37,7 +37,7 @@ exports.sendGameRequest = async function (req, res, next)
 
 exports.respondGameRequest = async function (req, res, next)
 {
-  const { opponentUserName } = req.body;
+  const { opponentUserName } = req.body; // one who sent the request
   const { answer } = req.body;
   const { playerId } = req.body;
 
@@ -54,13 +54,13 @@ exports.respondGameRequest = async function (req, res, next)
       });
 
       await game.save();
-      io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: game._id, accept: true });
+      io.getIO().emit(`gameResponse-${opponent._id}`, { gameId: game._id, accept: true });
 
-      const respond = new respondModel({ gameId: game._id }, 200, 'Game was created!');
+      const respond = new respondModel({ gameId: game._id, opponentId: opponent._id }, 200, 'Game was created!');
       res.json(respond);
     } else
     {
-      io.getIO().broadcast(`gameResponse-${opponentUserName}`, { gameId: null, accept: false });
+      io.getIO().emit(`gameResponse-${opponent._id}`, { gameId: null, accept: false });
 
       const respond = new respondModel({}, 210, 'Request declined!');
       res.json(respond);
