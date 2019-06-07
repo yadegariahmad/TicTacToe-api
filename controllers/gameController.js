@@ -75,6 +75,7 @@ exports.changeTurn = async function (req, res, next)
 {
   const { gameId } = req.body;
   const { playerId } = req.body;
+  const { squareNumber } = req.body;
 
   try
   {
@@ -84,7 +85,7 @@ exports.changeTurn = async function (req, res, next)
     const opponentIndex = gamePlayers.indexOf(playerId) == 0 ? 1 : 0;
     const opponent = await User.findById(gamePlayers[opponentIndex]);
 
-    io.getIO().broadcast(`changeTurn-${opponent.userName}`, 1);
+    io.getIO().emit(`changeTurn-${opponent._id}`, { squareNumber });
 
     const respond = new respondModel({}, 200, 'Turn changed!');
     res.json(respond);
