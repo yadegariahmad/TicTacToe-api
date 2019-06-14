@@ -94,8 +94,7 @@ exports.login = async function (req, res, next)
         userId: user._id.toString(),
         email: user.email
       },
-      'somesupersecretsecret',
-      { expiresIn: '10d' }
+      'somesupersecretsecret'
     );
     user.onlineStatus = true;
     await user.save();

@@ -20,14 +20,17 @@ exports.changeStatus = async function (req, res, next)
 exports.searchUser = async function (req, res, next)
 {
   const { userName } = req.body;
+  const { id } = req.body;
 
   try
   {
-    const users = await User.find({ userName: new RegExp(userName, 'i') })
+    let users = await User.find({ userName: new RegExp(userName, 'i') })
       .select('name onlineStatus userName');
 
     if (users)
     {
+      users = users.filter(user => user.id != id);
+
       const respond = new respondModel({ users }, 200, '');
       res.json(respond);
     } else

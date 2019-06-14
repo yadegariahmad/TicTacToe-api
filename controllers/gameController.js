@@ -47,7 +47,7 @@ exports.respondGameRequest = async function (req, res, next)
 
     if (answer)
     {
-      const date = new Date().toJSON().slice(0, 10).replace(/-/g, '/');
+      const date = new Date();
       const game = new Game({
         date,
         players: [playerId, opponent._id]
@@ -80,10 +80,9 @@ exports.changeTurn = async function (req, res, next)
   try
   {
     const game = await Game.findById(gameId);
-    // const user = await User.findById(playerId);
-    const gamePlayers = game.players;
-    const opponentIndex = gamePlayers.indexOf(playerId) == 0 ? 1 : 0;
-    const opponent = await User.findById(gamePlayers[opponentIndex]);
+    const players = game.players;
+    const opponentIndex = players.indexOf(playerId) == 0 ? 1 : 0;
+    const opponent = await User.findById(players[opponentIndex]);
 
     io.getIO().emit(`changeTurn-${opponent._id}`, { squareNumber });
 
@@ -98,13 +97,16 @@ exports.changeTurn = async function (req, res, next)
 exports.finishGame = async function (req, res, next)
 {
   const { gameId } = req.body;
+  const { playerId } = req.body; // player === winner
+  const { squareNumber } = req.body;
   const { draw } = req.body;
-  const { winnerId } = req.body;
 
   try
   {
     const game = await Game.findById(gameId);
     const players = game.players;
+    const opponentIndex = players.indexOf(playerId) == 0 ? 1 : 0;
+    const opponent = await User.findById(players[opponentIndex]);
 
     if (draw)
     {
@@ -118,17 +120,21 @@ exports.finishGame = async function (req, res, next)
       });
       await game.save();
 
+      io.getIO().emit(`finish-${opponent._id}`, { squareNumber, draw: true });
+
       const respond = new respondModel({ winner: null, draw: true }, 200, 'Game finished!');
       res.json(respond);
     } else
     {
       game.draw = false;
-      game.winner = winnerId
+      game.winner = playerId
 
-      const user = await User.findById(winnerId);
+      const user = await User.findById(playerId);
       user.score += 3;
       await user.save();
       await game.save();
+
+      io.getIO().emit(`finish-${opponent._id}`, { squareNumber, draw: false, winner: user.userName });
 
       const respond = new respondModel({ winner: user.userName, draw: false }, 200, 'Game finished!');
       res.json(respond);
