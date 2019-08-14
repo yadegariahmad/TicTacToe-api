@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
 const { json } = require('body-parser');
 const { connect } = require('mongoose');
+const { corsWhitelist } = require('./util/misc');
 
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
@@ -10,7 +13,9 @@ const userRoutes = require('./routes/user');
 const app = express();
 
 app.use(json()); // application/json
-app.use(cors());
+app.use(cors(corsWhitelist()));
+app.use(helmet());
+app.use(compression());
 
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
