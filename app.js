@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const { json } = require('body-parser');
 const { connect } = require('mongoose');
-const { corsWhitelist } = require('./util/misc');
+const { corsWhitelist } = require('./utils/misc');
 
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
