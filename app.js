@@ -42,6 +42,6 @@ connect(
     {
       console.log('Client connected');
     });
-    console.log('listening ...');
+    console.log('Listening ...');
   })
   .catch(err => console.log(err));
