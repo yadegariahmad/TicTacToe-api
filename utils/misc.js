@@ -1,6 +1,6 @@
 exports.corsWhitelist = () =>
 {
-  const whitelist = ['http://localhost:3000', 'http://localhost:4200', 'http://yadegariahmad.github.io'];
+  const whitelist = ['http://localhost:3000', 'http://localhost:4200', 'https://yadegariahmad.github.io'];
   const corsOptions = {
     origin: (origin, callback) =>
     {
