@@ -6,8 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "start:dev": "nodemon app.js"
+    "start:dev": "nodemon app.js",
+    "deploy": "gh-pages -d build"
   },
+  "homepage": "https://github.com/yadegariahmad/TicTacToe-api",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yadegariahmad/TicTacToe-api.git"
@@ -29,13 +31,14 @@
     "cors": "^2.8.5",
     "eslint": "^5.16.0",
     "express": "^4.17.1",
-    "helmet": "^3.20.0",
+    "gh-pages": "^2.1.1",
+    "helmet": "^3.21.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.5.12",
-    "socket.io": "^2.2.0",
+    "mongoose": "^5.7.14",
+    "socket.io": "^2.3.0",
     "validator": "^10.11.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.4"
   }
 }
