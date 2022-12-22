@@ -33,7 +33,7 @@
     "express": "^4.17.1",
     "gh-pages": "^2.1.1",
     "helmet": "^3.21.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^5.7.14",
     "socket.io": "^2.3.0",
     "validator": "^10.11.0"
